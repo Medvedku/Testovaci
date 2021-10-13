@@ -2,7 +2,7 @@ import numpy as np
 
 np.set_printoptions(precision=4)
 
-spiel = False
+spiel = True
 
 class Node:
     num_of_nodes = 0
@@ -74,6 +74,11 @@ class Element:
                     [   [ +1, -1 ],
                         [ -1, +1 ] ] )
 
+    def app_deformation(self, defs_: np.array, multiplier = 10):
+        self.def_coor     = [self.start_coor[0], self.start_coor[1],self.end_coor[0], self.end_coor[1] ]
+        for i in range(len(self.def_coor)):
+            self.def_coor[i] += defs_[i] * multiplier
+
 # >>>>>>>>>> Vstupy <<<<<<<<<<<<
 
 Nodes = []
@@ -81,7 +86,7 @@ Nodes.append(Node([ 0.0, 0.0 ]))                         # 0
 Nodes.append(Node([ 2.5, 0.0 ]))                         # 1
 Nodes.append(Node([ 5.0, 0.0 ]))                         # 2
 Nodes.append(Node([ 0.0, 1.0 ]))                         # 3
-Nodes.append(Node([ 2.5, 1.5 ], np.deg2rad(230)))          # 4
+Nodes.append(Node([ 2.5, 1.5 ], np.deg2rad(230)))        # 4
 Nodes.append(Node([ 5.0, 1.5 ]))                         # 5
 
 Elements = []
@@ -95,8 +100,6 @@ Elements.append(Element( Nodes[4], Nodes[2], 2500/1e6))
 Elements.append(Element( Nodes[5], Nodes[2], 2500/1e6))
 Elements.append(Element( Nodes[3], Nodes[4], 3600/1e6))
 Elements.append(Element( Nodes[4], Nodes[5], 3600/1e6))
-
-Elements.append(Element( Nodes[0], Nodes[4], 2500/1e6))
 
 
 # >>>>>>>>>> Začiatok Výpočtu <<<<<<<<<<<<
@@ -149,8 +152,29 @@ S = np.array([0, 1])
 
 N = [ np.matmul(S, R_el[i]) for i in range(n) ]
 
-for i in range(n):
-    print("Osová sila v prúte {} je {} kN.".format(format(i,".3g"), format(N[i],".5g") ))
+if spiel:
+
+    for i in range(n):
+        print("Osová sila v prúte {} je {} kN.".format(format(i,".3g"), format(N[i],".5g") ))
+
+if spiel:
+    import matplotlib.pyplot as plt
+
+    for i in range(n):
+        Elements[i].app_deformation(r_eg[i], 2500)
+
+    for i in Elements:
+        xs_ = np.array([i.start_coor[0], i.end_coor[0]])
+        zs_ = np.array([i.start_coor[1], i.end_coor[1]])
+        plt.plot(xs_, zs_, c="b", marker = "o")
+
+    for i in Elements:
+        xs = np.array([i.def_coor[0], i.def_coor[2]])
+        zs = np.array([i.def_coor[1], i.def_coor[3]])
+        plt.plot(xs, zs, c="r", marker = "o")
+
+    plt.show()
+
 
 
 # if spiel:
@@ -165,48 +189,3 @@ for i in range(n):
 #         )
 #         print("kodové čísla:", i.c_n)
         # print(i.k_elem)
-
-
-
-# Nodes = []
-# Nodes.append(Node([ 0.0, 0.0 ]))                         # 0
-# Nodes.append(Node([ 2.5, 0.0 ]))                         # 1
-# Nodes.append(Node([ 5.0, 0.0 ]))                         # 2
-# Nodes.append(Node([ 0.0, 1.0 ]))                         # 3
-# Nodes.append(Node([ 2.5, 1.5 ], np.deg2rad(230)))        # 4
-# Nodes.append(Node([ 5.0, 1.5 ]))                         # 5
-#
-# Elements = []
-# Elements.append(Element( Nodes[0], Nodes[1], 3600/1e6))
-# Elements.append(Element( Nodes[1], Nodes[2], 3600/1e6))
-# Elements.append(Element( Nodes[0], Nodes[3], 2500/1e6))
-# Elements.append(Element( Nodes[1], Nodes[3], 2500/1e6))
-# Elements.append(Element( Nodes[1], Nodes[4], 2500/1e6))
-# Elements.append(Element( Nodes[5], Nodes[1], 2500/1e6))
-# Elements.append(Element( Nodes[4], Nodes[2], 2500/1e6))
-# Elements.append(Element( Nodes[5], Nodes[2], 2500/1e6))
-# Elements.append(Element( Nodes[3], Nodes[4], 3600/1e6))
-# Elements.append(Element( Nodes[4], Nodes[5], 3600/1e6))
-
-
-
-# Nodes = []
-# Nodes.append(Node([ 0.0, 0.0 ], np.deg2rad(0.00)))   # 1
-# Nodes.append(Node([ 2.6, 0.0 ], np.deg2rad(0.00)))   # 2
-# Nodes.append(Node([ 5.2, 0.0 ], np.deg2rad(40.0)))   # 3
-# Nodes.append(Node([ 0.0, 1.9 ], np.deg2rad(0.00)))   # 4
-# Nodes.append(Node([ 2.6, 1.9 ], np.deg2rad(0.00)))   # 5
-# Nodes.append(Node([ 5.2, 1.9 ], np.deg2rad(0.00)))   # 6
-#
-# Elements = []
-# Elements.append(Element( Nodes[0], Nodes[1], 3500/1e6))  #1
-# Elements.append(Element( Nodes[1], Nodes[2], 3500/1e6))  #2
-# Elements.append(Element( Nodes[3], Nodes[4], 3400/1e6))  #3
-# Elements.append(Element( Nodes[4], Nodes[5], 3400/1e6))  #4
-# Elements.append(Element( Nodes[0], Nodes[3], 1900/1e6))  #5
-# Elements.append(Element( Nodes[1], Nodes[4], 1900/1e6))  #6
-# Elements.append(Element( Nodes[2], Nodes[5], 1900/1e6))  #7
-# Elements.append(Element( Nodes[0], Nodes[4], 1900/1e6))  #8
-# Elements.append(Element( Nodes[1], Nodes[5], 1900/1e6))  #9
-# Elements.append(Element( Nodes[1], Nodes[3], 1900/1e6))  #10
-# Elements.append(Element( Nodes[2], Nodes[4], 1900/1e6))  #11
